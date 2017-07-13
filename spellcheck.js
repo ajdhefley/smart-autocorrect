@@ -50,22 +50,19 @@ class Spellcheck
                             if (proximal > proximal_tolerance)
                             {
                                 matches = false;
-                                break;
                             }
-                            else
-                            {
-                                proximal_score += proximal;
-                            }
+
+                            proximal_score += proximal;
                         }
 
-                        if (matches && proximal_score <= proximal_tolerance)
+                        // Ensure that at least one word is suggested.
+                        if ((matches && proximal_score <= proximal_tolerance) || suggested.length == 0)
                         {
                             suggested.push({ word: word, proximal: proximal_score });
                         }
                     }
 
                     // TODO: compare words of differing lengths
-                    // TODO: break up word dictionary into separate dictionaries by starting letter, search / compare accordingly
                     // TODO: affect proximal probability of current letter mismatch based on previously typed letter
                 });
 
