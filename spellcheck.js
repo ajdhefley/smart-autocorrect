@@ -3,6 +3,17 @@ const Keyboard = require('./keyboard');
 
 class Spellcheck
 {
+    static dictionary(letter)
+    {
+        let reg = /^[a-z]$/;
+        if ( !reg.test(letter) )
+        {
+            throw new Error('Letter not recognized');
+        }
+
+        return `./dictionary/words-${letter}`;
+    }
+
     // word: word to spellcheck
     // proximal_tolerance: number of mismatches allowed
     // keyboard: arrangement of letters to base mismatches on
@@ -14,54 +25,65 @@ class Spellcheck
             throw new Error('Keyboard not recognized');
         }
 
-        fs.readFile('./words', 'utf8', function (err, data)
+        try
         {
-            let words = data.split('\n');
-            let suggested = [];
+            let dic_file = Spellcheck.dictionary(input[0]);
 
-            words.forEach(function(word)
+            fs.readFile(dic_file, 'utf8', function (err, data)
             {
-                if (input.length === word.length)
+                let words = data.split('\n');
+                let suggested = [];
+
+                words.forEach(function (word)
                 {
-                    let matches = true;
-                    let proximal_score = 0;
-
-                    for (let i = 0; i < word.length; i++)
+                    if (input.length === word.length)
                     {
-                        let l1 = input[i].toLowerCase();
-                        let l2 = word[i].toLowerCase();
-                        let proximal = keyboard.proximal(l1, l2);
+                        let matches = true;
+                        let proximal_score = 0;
 
-                        if (proximal > proximal_tolerance)
+                        for (let i = 0; i < word.length; i++)
                         {
-                            matches = false;
-                            break;
+                            let l1 = input[i].toLowerCase();
+                            let l2 = word[i].toLowerCase();
+                            let proximal = keyboard.proximal(l1, l2);
+
+                            if (proximal > proximal_tolerance)
+                            {
+                                matches = false;
+                                break;
+                            }
+                            else
+                            {
+                                proximal_score += proximal;
+                            }
                         }
-                        else
+
+                        if (matches && proximal_score <= proximal_tolerance)
                         {
-                            proximal_score += proximal;
+                            suggested.push({ word: word, proximal: proximal_score });
                         }
                     }
 
-                    if (matches && proximal_score <= proximal_tolerance)
-                    {
-                        suggested.push({ word: word, proximal: proximal_score });
-                    }
+                    // TODO: compare words of differing lengths
+                    // TODO: break up word dictionary into separate dictionaries by starting letter, search / compare accordingly
+                    // TODO: affect proximal probability of current letter mismatch based on previously typed letter
+                });
+
+                suggested.sort(function (a, b)
+                {
+                    return a.proximal - b.proximal;
+                });
+
+                if (typeof (callback) === 'function')
+                {
+                    callback(suggested);
                 }
-
-                // TODO: words of differing lengths
             });
-
-            suggested.sort(function(a, b)
-            {
-                return a.proximal - b.proximal;
-            });
-
-            if (typeof (callback) === 'function')
-            {
-                callback(suggested);
-            }
-        });
+        }
+        catch (ex)
+        {
+            throw ex;
+        }
     };
 };
 
