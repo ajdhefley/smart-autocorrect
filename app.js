@@ -1,8 +1,17 @@
+//////////////// REQUIRE ////////////////
+
 const express = require('express');
 const path = require('path');
 
 const Keyboard = require('./keyboard');
 const Spellcheck = require('./spellcheck');
+
+////////////////////////////////////////////////
+
+
+
+
+//////////////// KEYBOARDS ////////////////
 
 var KEY_QUERTY = new Keyboard(
     [ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p' ],
@@ -15,6 +24,13 @@ var KEY_DVORAK = new Keyboard(
     [ 'a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's' ],
     [ 'q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z' ]
 );
+
+////////////////////////////////////////////////
+
+
+
+
+//////////////// APP ////////////////
 
 var app = express();
 
@@ -38,3 +54,5 @@ app.get('/check', function (req, res)
 });
 
 app.listen(8000);
+
+////////////////////////////////////////////////
