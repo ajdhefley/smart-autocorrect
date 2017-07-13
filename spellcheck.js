@@ -5,8 +5,8 @@ class Spellcheck
 {
     static dictionary(letter)
     {
-        let reg = /^[a-z]$/;
-        if ( !reg.test(letter) )
+        let alpha = /^[a-z]$/;
+        if ( !alpha.test(letter) )
         {
             throw new Error('Letter not recognized');
         }
@@ -55,16 +55,32 @@ class Spellcheck
                             proximal_score += proximal;
                         }
 
-                        // Ensure that at least one word is suggested.
+                        // Ensure that at least one word is suggested. If better
+                        // alternatives are found later, initial dud will be removed.
                         if ((matches && proximal_score <= proximal_tolerance) || suggested.length == 0)
                         {
-                            suggested.push({ word: word, proximal: proximal_score });
+                            let word_obj = { word: word, proximal: proximal_score };
+                            if (suggested.length === 0)
+                            {
+                                word_obj.dud = true;
+                            }
+
+                            suggested.push(word_obj);
                         }
                     }
 
                     // TODO: compare words of differing lengths
                     // TODO: affect proximal probability of current letter mismatch based on previously typed letter
                 });
+
+                for (let i = 0; i < suggested.length; i++)
+                {
+                    if (suggested[i].dud && suggested.length > 1)
+                    {
+                        suggested.splice(i, 1);
+                        break;
+                    }
+                }
 
                 suggested.sort(function (a, b)
                 {
