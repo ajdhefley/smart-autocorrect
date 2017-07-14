@@ -1,3 +1,21 @@
+function getLetterLocation(keyboard, l)
+{
+    let location = {};
+
+    for (let i = 0; i < keyboard.rows.length; i++)
+    {
+        for (let j = 0; j < keyboard.rows[i].length; j++)
+        {
+            if (keyboard.rows[i][j] === l)
+            {
+                return { row: i, letter: j };
+            }
+        }
+    }
+
+    return {};
+}
+
 class Keyboard
 {
     constructor(...rows)
@@ -15,24 +33,12 @@ class Keyboard
         Object.freeze(this);
     }
 
-    getLetterLocation(l)
-    {
-        let location = {};
-
-        for (let i = 0; i < this.rows.length; i++)
-        {
-            for (let j = 0; j < this.rows[i].length; j++)
-            {
-                if (this.rows[i][j] === l)
-                {
-                    return { row: i, letter: j };
-                }
-            }
-        }
-
-        return {};
-    }
-
+    /**
+     * Determine the distance (proximal) between two keys on keyboard.
+     * 
+     * @param {string} l1 
+     * @param {string} l2 
+     */
     proximal(l1, l2)
     {
         if (l1 === l2)
@@ -41,7 +47,7 @@ class Keyboard
         }
             
         let self = this;
-        let l1_location = this.getLetterLocation(l1);
+        let l1_location = getLetterLocation(this, l1);
 
         for (let i = 0; i < this.rows.length; i++)
         {
