@@ -46,26 +46,15 @@ class Keyboard
             return 0;
         }
             
-        let self = this;
         let l1_location = getLetterLocation(this, l1);
+        let l2_location = getLetterLocation(this, l2);
 
-        for (let i = 0; i < this.rows.length; i++)
-        {
-            for (let j = 0; j < this.rows[i].length; j++)
-            {
-                if (l2 === this.rows[i][j])
-                {
-                    let row_term = Math.abs(l1_location.row - i);
-                    row_term = Math.pow(row_term, 2);
-                    let letter_term = Math.abs(l1_location.letter - j);
-                    letter_term = Math.pow(letter_term, 2);
-                    let proximal = Math.sqrt(row_term + letter_term);
-                    return proximal;
-                }
-            }
-        }
-
-        return -1;
+        let row_term = Math.abs(l1_location.row - l2_location.row);
+        row_term = Math.pow(row_term, 2);
+        let letter_term = Math.abs(l1_location.letter - l2_location.letter);
+        letter_term = Math.pow(letter_term, 2);
+        let proximal = Math.sqrt(row_term + letter_term);
+        return proximal;
     }
 }
 
