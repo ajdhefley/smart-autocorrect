@@ -1,59 +1,41 @@
 const fs = require('fs');
 const Keyboard = require('./keyboard');
 
+function dictionary(letter)
+{
+    let alpha = /^[a-z]$/;
+    if ( !alpha.test(letter) )
+    {
+        throw new Error('Letter not recognized');
+    }
+
+    return `./dictionary/words-${letter}`;
+}
+
+function purge_duds(list)
+{
+    for (let i = 0; i < list.length; i++) 
+    {
+        if (list[i].dud && list.length > 1)
+        {
+            list.splice(i, 1);
+        }
+    }
+
+    return list;
+}
+
+function sort_proximals(list)
+{
+    return list.sort(function (a, b)
+    {
+        return a.proximal - b.proximal;
+    });
+}
+
+
 class Spellcheck
 {
-    /**
-     * Dictionaries of words to suggest from are segmented by starting letter.
-     * Get the appropriate dictionary file from (starting) letter.
-     * 
-     * @param {string} letter 
-     */
-    static dictionary(letter)
-    {
-        let alpha = /^[a-z]$/;
-        if ( !alpha.test(letter) )
-        {
-            throw new Error('Letter not recognized');
-        }
-
-        return `./dictionary/words-${letter}`;
-    }
-
-    /**
-     * Duds are added to suggested words to ensure that at least one
-     * word is always suggested, even if no decent match. On the other
-     * hand, if decent matches are found, duds should be purged. In such
-     * case, this function is used.
-     * 
-     * @param {Object[]} list 
-     */
-    static purge_duds(list)
-    {
-        for (let i = 0; i < list.length; i++)
-        {
-            if (list[i].dud && list.length > 1)
-            {
-                list.splice(i, 1);
-            }
-        }
-
-        return list;
-    }
-
-    /**
-     * Sort list of suggested words by proximal (lower proximal means higher priority).
-     * 
-     * @param {Object[]} list 
-     */
-    static sort_proximals(list)
-    {
-        return list.sort(function (a, b)
-        {
-            return a.proximal - b.proximal;
-        });
-    }
-
     /**
      * Return an array of suggested words based on (misspelled) input word.
      * 
@@ -71,7 +53,7 @@ class Spellcheck
 
         try
         {
-            let dic_file = Spellcheck.dictionary(input[0]);
+            let dic_file = dictionary(input[0]);
 
             fs.readFile(dic_file, 'utf8', function (err, data)
             {
@@ -99,7 +81,7 @@ class Spellcheck
                             proximal_score += proximal;
                         }
 
-                        suggested = Spellcheck.purge_duds(suggested);
+                        suggested = purge_duds(suggested);
 
                         // Ensure that at least one word is suggested. If better
                         // alternatives are found later, initial dud will be removed.
@@ -120,7 +102,7 @@ class Spellcheck
                     // TODO: affect proximal probability of current letter mismatch based on previously typed letter
                 });
 
-                suggested = Spellcheck.sort_proximals(suggested);
+                suggested = sort_proximals(suggested);
 
                 if (typeof (callback) === 'function')
                 {
